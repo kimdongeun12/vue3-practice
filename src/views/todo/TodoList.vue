@@ -1,6 +1,11 @@
 <template>
   <v-container>
-    <TodoListWrap :Todolists="Todolists" />
+    <TodoListWrap
+      :Todolists="Todolists"
+      @isChecked="isChecked"
+      @deleteTodo="deleteTodo"
+      @showDialog="showDialog"
+    />
     <v-btn
       class="floating"
       icon="mdi-pencil"
@@ -10,9 +15,11 @@
     <v-dialog v-model="dialog">
       <TodoListWrite
         :dialog="dialog"
-        :edit="edit"
-        @hideTodo="hideDialog()"
-        @submitTodo="submitDialog()"
+        :edits="edits"
+        :editTodo="edits.edit ? Todolists[edits.idx] : {}"
+        @hideDialog="hideDialog"
+        @submitDialog="submitDialog"
+        @editSubmitDialog="editSubmitDialog"
       />
     </v-dialog>
   </v-container>
@@ -24,6 +31,7 @@ import TodoListWrap from "./TodoListWrap.vue";
 import TodoListWrite from "./TodoListWrite.vue";
 
 interface ITodoLists {
+  id: Number;
   title: string;
   contents: string;
   checked: boolean;
@@ -38,23 +46,53 @@ export default defineComponent({
   data() {
     return {
       dialog: false,
-      edit: false,
+      edits: {
+        idx: 0,
+        edit: false,
+      },
       Todolists: [
-        { title: "제목이야", contents: "sss", checked: true },
+        { id: 1, title: "제목이야", contents: "sss", checked: true },
       ] as ITodoLists[],
     };
   },
   methods: {
-    showDialog() {
+    showDialog(idx?: number) {
       this.dialog = true;
+      if (idx !== undefined) {
+        this.edits.idx = idx;
+        this.edits.edit = true;
+      } else {
+        this.edits.idx = 0;
+        this.edits.edit = false;
+      }
     },
     hideDialog() {
-      console.log("sss");
       this.dialog = false;
     },
-    submitDialog(title: string, contents: string) {
-      console.log("submit 완료!", title, contents);
+    submitDialog(todos: ITodoLists) {
+      console.log("submit 완료!", todos, this.Todolists.length + 1);
+      const TodoItem = {
+        ...todos,
+        id: this.Todolists.length + 1,
+      };
+      this.Todolists.push(TodoItem);
       this.dialog = false;
+    },
+    editSubmitDialog(todos: ITodoLists) {
+      console.log("submit 수정!", todos, this.Todolists.length + 1);
+      const TodoItem = {
+        ...todos,
+      };
+      this.Todolists[this.edits.idx] = TodoItem;
+      this.dialog = false;
+    },
+    isChecked(idx: number) {
+      console.log("asss", idx);
+      this.Todolists[idx].checked = !this.Todolists[idx].checked;
+    },
+    deleteTodo(idx: number) {
+      console.log("asss", idx);
+      this.Todolists.splice(idx, 1);
     },
   },
 });
