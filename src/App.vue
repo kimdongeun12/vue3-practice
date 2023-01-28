@@ -10,7 +10,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import TodoList from "./views/todo/TodoList.vue";
-import "@/assets/css/default.scss";
 
 export default defineComponent({
   name: "App",
